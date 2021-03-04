@@ -1,14 +1,14 @@
 # pglex - A 'pretty good' lexical service
 
-pglex is a 'pretty good' lexical service (pglex) designed to facilitate
+pglex is a 'pretty good' lexical service designed to facilitate
 the construction of dictionary websites and other applications that
 incorporate lexical data. With pglex, researchers can provide lexical
 entries in JSON format to an instance of the pglex API and get
-‘pretty good’ search results without requiring language-specific
+'pretty good' search results without requiring language-specific
 configurations.
 
 To use pglex you create one or more [Elasticsearch](https://www.elastic.co/what-is/elasticsearch)
-indexes for your language projects that contain lexical entries that use
+indexes for your language projects that contain lexical entries, using
 predefined fields common to lexical entries. You can then use the pglex
 API to query and retrieve your entries. The pglex API has built-in
 defaults that make lexical queries simple to construct.
@@ -22,14 +22,14 @@ could be adapted to another serverless framework or self-hosted setup.
 
 API queries are constructed by adding a project name and action to your
 API endpoint and `POST`ing a query payload. For example, the `q` action is
-used to search your lexical entries. If we want to search the entries of
+used to search your lexical entries. If you want to search the entries of
 the `karuk` project the query might look like:
 
 `POST`
 `https://0d687zto0h.execute-api.us-east-1.amazonaws.com/api/karuk/q`
 JSON Payload: `{ "q": "salmon" }`
 
-This query searches the lexical entries in the `karuk` Elasticsearch index
+This query searches the lexical entries in the `karuk` ES index
 and returns a JSON object containing an array of search entries ranked
 by relevance.
 
@@ -78,12 +78,21 @@ offerings. You can use the following command to create a working environment
 in [Anaconda Python](https://www.anaconda.com/products/individual):
 
 ```
-conda create --name pglex --channel conda-forge python=3.7.1 chalice=1.9.1 elasticsearch=6.3.1 elasticsearch-dsl=6.3.0 requests-aws4auth=0.9 awscli=1.16.132
+conda create --name pglex --channel conda-forge python=3.7.1 chalice=1.9.1 \
+    elasticsearch=6.3.1 elasticsearch-dsl=6.3.0 requests-aws4auth=0.9 \
+    awscli=1.16.132
 ```
 
 This command creates an environment named `pglex` with dependencies known to
-be compatible with pglex. It is possible that newer versions of these libraries
-are also compatible, but these are untested.
+be compatible with pglex and deployment on AWS. It is possible that newer
+versions of these libraries are also compatible, but these are untested.
+
+Activate the `pglex` environment to ensure the packages and tools you need
+are available:
+
+```
+conda activate pglex
+```
 
 ### Log in to the AWS Management Console
 
@@ -93,13 +102,15 @@ To get started, log in to the
 After you log in, select an [AWS region](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html)
 where you want to deploy pglex. Normally
 you can see the current region in the upper right hand corner of the console.
-Our example will use `us-west-1` (N. California), and you should select a
-region appropriate for your needs.
+Our example will use `us-west-1` (N. California), and you should select the
+region where you wish to deploy.
 
 ### Set up IAM groups and users
 
-First we create a group named `pglex_deploy` with policies attached to it that
-are appropriate for deploying the pglex service. We also create a user named
+We use AWS Identity and Access Management (IAM) to create a user named
+`pglex_deployer` with appropriate permissions to deploy the pglex service.
+To do this we create a group named `pglex_deploy` with policies attached to
+it that are needed to deploy pglex. We then create a user named
 `pglex_deployer` and add it to the `pflex_deploy` group.
 
 #### Create the deployment group
@@ -109,9 +120,9 @@ are appropriate for deploying the pglex service. We also create a user named
 1. Click on the 'Create new group' button.
 1. For group name, use `pglex_deploy`.
 1. Search for and select the following AWS Managed policies to attach to the group.
-  - AWSLambdaFullAccess
-  - AmazonAPIGatewayAdministrator
-  - IAMFullAccess
+   * AWSLambdaFullAccess
+   * AmazonAPIGatewayAdministrator
+   * IAMFullAccess
 1. Click the 'Create group' button to finish creating the group.
 
 #### Create the deployment user
@@ -128,7 +139,8 @@ chance to copy them. Either use the 'Download .csv' button to save the credentia
 in a .csv file, or copy and paste the Access key ID and Secret access key to
 a secure location. If you forget to do this step or lose the credentials you
 can assign a new set of credentials for the `pglex_deployer` user at any time
-in the IAM console.
+in the IAM console. ***Do not share these credentials or hardcode them in
+your repository.***
 
 ### Store your AWS user credentials
 
@@ -144,7 +156,8 @@ region=us-west-1
 ```
 
 The access key id and secret access key values are the ones that you saved
-when you created the `pglex_deployer` user.
+when you created the `pglex_deployer` user. The `region` is the same region
+you selected for deploying.
 
 You can test the `aws` command and `pglex_deployer` credentials with:
 
@@ -186,11 +199,13 @@ but this has not been tested.
 1. For Elasticsearch domain name choose 'pglex'.
 1. It is not necessary to enable a custom endpoint.
 1. For the least expensive operation choose the smallest instance type,
-t2.small.elasticsearch, and set the number of nodes to 1. AWS recommends more
+`t2.small.elasticsearch`, and set the number of nodes to 1. AWS recommends more
 redundancy (nodes) for production services, but in practice we have found this
 minimal setup has been sufficient for our needs and has been reliable. If your
 ES domain requires more resources you can increase the number and size of your
-instances types easily in the management console.
+instances types easily in the management console. Make sure you understand
+AWS pricing for these machine instances so that you can estimate the costs
+associated with the pglex service.
 1. For data node storage select type 'EBS', EBS volume type 'General purpose
 (SSD)', and storage size per node '10' GiB.
 1. Do not enable dedicated master nodes.
@@ -211,8 +226,8 @@ app.
 ### Deploy the Chalice app
 
 The Chalice application creates your API endpoints and routes requests to
-Lambda functions that query your ES domain. Query results from ES are packed
-by the function and returned to the client.
+Lambda functions that query your ES domain. Query results from ES are then
+assembled by the function and returned to the client.
 
 #### Create `config.json`
 
@@ -258,15 +273,15 @@ You can find the `es_endpoint` value by visiting the 'Overview' of the `pglex`
 ES domain in the AWS Management Console. Use the hostname without the protocol
 (https://).
 
-You can deploy multiple versions of the API using stages. In our example there
-are two stages for development and production versions of the API. The
+You can deploy multiple versions of the API using stages. In our `config.json`
+there are two stages for development and production versions of the API. The
 `api_gateway_stage` value is a string that is appended to the AWS hostname as
 part of the URL. Any environment variables that should have specific values
 per-stage can be defined here instead of in the top-level `enrvironment_variables`
 container. The `cors_domain` variable should be set to the hostname of the
 server where your application that uses the API is located. For example, if
 your online dictionary is at http://linguistics.berkeley.edu/~karuk, then
-`linguistics.berkeley.edu` is an appropriate value.
+`linguistics.berkeley.edu` is the value you would use for `cors_domain`.
 
 Because the `.chalice` directory is named with a leading '.' your operating
 system might treat it as hidden and make it difficult for you to find it.
@@ -309,7 +324,7 @@ name and action to this URL, e.g.
 `https://o6avgt37eh.execute-api.us-west-1.amazonaws.com/devapi/karuk/q`.
 
 As you can see from the API URL, Chalice's default deployment stage is
-"dev". To deploy the "prod" stage use the `--stage` parameter:
+"dev". To deploy the production stage use the `--stage` parameter:
 
 ```
 chalice deploy --stage prod
@@ -372,7 +387,7 @@ See the [ES docs](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/in
 for more on creating indexes.
 
 You can then use the `_bulk` endpoint to load data from the
-[lex_karuk_1-lex_bulkdata.json](examples/lex_karuk_1-lex_bulkdata.json) file:
+[lex_karuk_1-lex-bulkdata.json](examples/lex_karuk_1-lex-bulkdata.json) file:
 
 ```
 PUT lex_karuk_1-lex/_bulk
