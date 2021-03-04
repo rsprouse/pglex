@@ -115,7 +115,9 @@ it that are needed to deploy pglex. We then create a user named
 
 #### Create the deployment group
 
-1. Navigate to the Identity and Access Management (IAM) service.
+1. Navigate to the Identity and Access Management (IAM) service. Users and
+groups are not specific to an AWS region, and the region context will be
+'Global'.
 1. Select 'Groups' from IAM sidebar.
 1. Click on the 'Create new group' button.
 1. For group name, use `pglex_deploy`.
@@ -157,7 +159,7 @@ region=us-west-1
 
 The access key id and secret access key values are the ones that you saved
 when you created the `pglex_deployer` user. The `region` is the same region
-you selected for deploying.
+you will select for deploying.
 
 You can test the `aws` command and `pglex_deployer` credentials with:
 
@@ -188,10 +190,11 @@ restricts access to the ES domain to this user.
 1. Copy and save the User ARN value you find in the summary information. You will
 use this value when creating an access policy for your ES domain.
 
-To create your Elasticsearch domain navigate to the Elasticsearch service.
+To create your Elasticsearch domain:
 
-1. ES domains can be created in many different AWS regions. Make sure that
-your console is set to the appropriate region before getting started.
+1. Navigate to the Elasticsearch service. ES domains can be created in many
+different AWS regions. Make sure that your console is set to your desired
+region before creating a domain.
 1. Click on the 'Create a new domain' button.
 1. Choose deployment type 'Development and testing'.
 1. Choose Elasticsearch version 6.8. The pglex code might work with ES 7.x,
@@ -209,8 +212,8 @@ associated with the pglex service.
 1. For data node storage select type 'EBS', EBS volume type 'General purpose
 (SSD)', and storage size per node '10' GiB.
 1. Do not enable dedicated master nodes.
-1. For network configuration choose 'Public access'. An access policy will
-restrict access to the `pglex_deployer` user.
+1. For network configuration choose 'Public access'. We will use an access
+policy to restrict access to the `pglex_deployer` user only.
 1. It is not necessary to enable fine-grained access control, SAML authentication
 for Kibana, or Amazon Cognito authentication.
 1. For access policy, choose 'Custom access policy' with the settings 'IAM ARN'
@@ -277,11 +280,12 @@ You can deploy multiple versions of the API using stages. In our `config.json`
 there are two stages for development and production versions of the API. The
 `api_gateway_stage` value is a string that is appended to the AWS hostname as
 part of the URL. Any environment variables that should have specific values
-per-stage can be defined here instead of in the top-level `enrvironment_variables`
-container. The `cors_domain` variable should be set to the hostname of the
-server where your application that uses the API is located. For example, if
-your online dictionary is at http://linguistics.berkeley.edu/~karuk, then
-`linguistics.berkeley.edu` is the value you would use for `cors_domain`.
+per-stage can be under `stages` instead of in the top-level
+`environment_variables` container. The `cors_domain` variable should be set
+to the hostname of the server where your application that uses the API is
+located. For example, if your online dictionary is at
+http://linguistics.berkeley.edu/~karuk, then `linguistics.berkeley.edu` is
+the value you would use for `cors_domain`.
 
 Because the `.chalice` directory is named with a leading '.' your operating
 system might treat it as hidden and make it difficult for you to find it.
@@ -320,7 +324,7 @@ Resources deployed:
 ```
 
 The `Rest API URL` is the base URL for your pglex API. Add your project
-name and action to this URL, e.g.
+name and an action to this URL, e.g.
 `https://o6avgt37eh.execute-api.us-west-1.amazonaws.com/devapi/karuk/q`.
 
 As you can see from the API URL, Chalice's default deployment stage is
