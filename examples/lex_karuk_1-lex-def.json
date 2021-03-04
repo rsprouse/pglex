@@ -1,0 +1,171 @@
+{
+  "settings": {
+    "analysis": {
+      "char_filter": { 
+        "apostrophe_to_glottal_stop": {
+          "type": "mapping",
+          "mappings": [ 
+            "\\u0027=>\\u0294"
+          ]
+        }
+      },
+      "analyzer": {
+        "lex_lower_only": {
+          "tokenizer": "whitespace",
+          "filter": ["lowercase"]
+        },
+        "lex_lower_icu_folded_with_punc": {
+          "tokenizer": "whitespace",
+          "filter": ["lowercase", "icu_folding"]
+        },
+        "lex_lower_icu_folded_no_punc": {
+          "tokenizer": "icu_tokenizer",
+          "filter": ["lowercase", "icu_folding"]
+        },
+        "lex_lower_icu_folded_no_punc_apostrophe": {
+          "char_filter": [ "apostrophe_to_glottal_stop" ],
+          "tokenizer": "icu_tokenizer",
+          "filter": ["lowercase", "icu_folding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "lex": {
+      "properties": {
+        "id": { "type": "keyword" },
+        "sortlex": { "type": "keyword" },
+        "lex": {
+          "type": "icu_collation_keyword",
+          "strength": "primary",
+          "decomposition": "canonical",
+          "case_level": false,
+          "alternate": "shifted",
+          "store": true,
+          "index": false,
+          "fields": {
+            "lo": {
+              "type": "text",
+              "analyzer": "lex_lower_only"
+            },
+            "lfwp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_with_punc"
+            },
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc_apostrophe"
+            }
+          }
+        },
+        "variants": {
+          "type": "keyword",
+          "fields": {
+            "lo": {
+              "type": "text",
+              "analyzer": "lex_lower_only"
+            },
+            "lfwp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_with_punc"
+            },
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc_apostrophe"
+            }
+          }
+        },
+        "morphemes.morph_lex": {
+          "type": "keyword",
+          "fields": {
+            "lo": {
+              "type": "text",
+              "analyzer": "lex_lower_only"
+            },
+            "lfwp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_with_punc"
+            },
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc_apostrophe"
+            }
+          }
+        },
+        "morphemes.morph_gloss": { "type": "text", "analyzer": "english" },
+        "morphemes.morph_id": { "type": "keyword", "index": false },
+        "deriv_lex": {
+          "type": "keyword",
+          "fields": {
+            "lo": {
+              "type": "text",
+              "analyzer": "lex_lower_only"
+            },
+            "lfwp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_with_punc"
+            },
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc_apostrophe"
+            }
+          }
+        },
+        "deriv_defn": { "type": "text", "analyzer": "english" },
+        "deriv_id": { "type": "keyword", "index": false },
+        "media.media_lex": {
+          "type": "keyword",
+          "fields": {
+            "lo": {
+              "type": "text",
+              "analyzer": "lex_lower_only"
+            },
+            "lfwp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_with_punc"
+            },
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc_apostrophe"
+            }
+          }
+        },
+        "media.media_gloss": { "type": "text", "analyzer": "english" },
+        "media.media_id": { "type": "keyword", "index": false },
+        "media.media_url": { "type": "keyword", "index": false },
+        "pos": {
+          "type": "keyword",
+          "fields": {
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc"
+            }
+          }
+        },
+        "sdomain": {
+          "type": "keyword",
+          "fields": {
+            "lfnp": {
+              "type": "text",
+              "analyzer": "lex_lower_icu_folded_no_punc"
+            }
+          }
+        },
+        "defn": { "type": "text", "analyzer": "english" },
+        "gloss": { "type": "text", "analyzer": "english" },
+        "note": { "type": "text", "analyzer": "english" },
+        "ref": { "type": "text", "analyzer": "english" },
+        "ex_sl": { "type": "text" },
+        "ex_cl": { "type": "text", "analyzer": "english" },
+        "ex_ref": { "type": "text", "analyzer": "english" },
+        "litgloss": { "type": "text", "analyzer": "english" },
+        "sciname": { "type": "text", "analyzer": "english" },
+        "usage_note": { "type": "text", "analyzer": "english" },
+        "ur": { "type": "text" },
+        "has_media": { "type": "boolean" },
+        "is_morph": { "type": "boolean" },
+        "popcnt": { "type": "integer" }
+      }
+    }
+  }
+}
