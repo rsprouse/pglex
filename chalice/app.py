@@ -105,8 +105,6 @@ source_fields = {
         'lex', 'defn', 'pos', 'gloss', 'ref', 'litgloss',
         'note', 'variants', 'sdomain', 'usage', 'ur', 'sciname',
         'ex_ol', 'ex_cl', 'ex', 'media', 'derivs', 'morphemes',
-        'ImmediateConstituents',
-        'Example_rf', 'PrintDictGramNote',
     ],
     'exclude': ['']
 }
