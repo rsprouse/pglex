@@ -47,7 +47,15 @@ target_lang_search_fields = [
     'variants.lfwp',
     'variants.lfnp',
     'ex_ol',
-    'morph_lex',
+    'media_lex.lo',
+    'media_lex.lfwp',
+    'media_lex.lfnp',
+    'morph_lex.lo',
+    'morph_lex.lfwp',
+    'morph_lex.lfnp',
+    'deriv_lex.lo',
+    'deriv_lex.lfwp',
+    'deriv_lex.lfnp',
     'ur',
 ]
 
