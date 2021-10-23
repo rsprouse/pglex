@@ -319,7 +319,7 @@ Creating IAM role: pglex-dev
 Creating lambda function: pglex-dev
 Creating Rest API
 Resources deployed:
-  - Lambda ARN: arn:aws:lambda:us-west-1:967992620111:function:pglex-dev
+  - Lambda ARN: arn:aws:lambda:us-west-1:<acct_id>:function:pglex-dev
   - Rest API URL: https://o6avgt37eh.execute-api.us-west-1.amazonaws.com/devapi/
 ```
 
